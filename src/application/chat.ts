@@ -54,6 +54,8 @@ class ChatService {
 
     async newMessage(chatId: string, content: string, images: string[], video: string, senderId: string, receiverId: string): Promise<{ success: boolean, message: string, data?: IMessage }> {
         try {
+
+            console.log(senderId,'-----------',receiverId   )
             const result = await this.chatRepo.createMessage(chatId, content, images, video, senderId, receiverId);
 
             if (!result || !result.success) {

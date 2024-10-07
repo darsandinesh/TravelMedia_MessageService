@@ -1,4 +1,5 @@
 import { chatController } from '../../interface/chatController';
+import { notificationController } from '../../interface/notificationController';
 import RabbitMQClient from './client';
 
 export default class MessageHandler {
@@ -21,11 +22,19 @@ export default class MessageHandler {
                 response = await chatController.saveNewMessage(data);
                 break;
 
+            // notificaiton impementaion here
+            case 'save-notification':
+                response = await notificationController.saveNotification(data);
+                break;
+            case 'getNotification':
+                response = await notificationController.getNotification(data);
+                break;
+
             default:
                 response = { error: "Operation not supported" };
                 break;
         }
-        console.log(response,'in message handler');
+        console.log(response, 'in message handler');
         await RabbitMQClient.produce(response, correlationId, replyTo);
     }
 }

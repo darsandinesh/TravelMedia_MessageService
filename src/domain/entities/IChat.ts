@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // Interface for a message in the chat
 export interface IMessage {
     senderId?: string;
-    recieverId?: string;
+    receiverId?: string;
     content?:string;
     imagesUrl?:string[];
     videoUrl?:string;

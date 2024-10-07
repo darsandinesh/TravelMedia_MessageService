@@ -29,7 +29,7 @@ export class ChatRepository implements IChatRepository {
                 participants: chat?.participants?.filter(p => p !== userId),
                 lastMessage: chat.lastMessage,
             }))
-            console.log(formattedChats,'--format');
+            console.log(formattedChats, '--format');
             return { success: true, message: "Chats found", data: formattedChats };
         } catch (error) {
             const err = error as Error;
@@ -60,31 +60,53 @@ export class ChatRepository implements IChatRepository {
         }
     }
 
-    async findMessages(userId: string, reciverId: string): Promise<{ success: boolean, message: string, data?: IMessage[] }> {
+    async findMessages(userId: string, receiverId: string): Promise<{ success: boolean, message: string, data?: IMessage[] }> {
         try {
+
+            console.log(userId, receiverId, '--------------data in find mesage')
             if (!mongoose.Types.ObjectId.isValid(userId)) {
                 return { success: false, message: 'Invalid userId fromat' }
             }
 
-            if (!mongoose.Types.ObjectId.isValid(reciverId)) {
+            if (!mongoose.Types.ObjectId.isValid(receiverId)) {
                 return { success: false, message: 'Invalid reciverId fromat' }
             }
 
             const UserIdObj = new mongoose.Types.ObjectId(userId);
-            const ReciverIdObj = new mongoose.Types.ObjectId(reciverId);
+            const ReciverIdObj = new mongoose.Types.ObjectId(receiverId);
 
-            const message = await Message.find({
-                $or: [
-                    { senderId: UserIdObj, recieverId: ReciverIdObj },
-                    { senderId: ReciverIdObj, recieverId: UserIdObj }
-                ]
-            }).sort({ createdAt: 1 });
+            // const messages = await Message.find({
+            //     $or: [
+            //       { senderId: UserIdObj, receiverId: ReciverIdObj },
+            //       { senderId: ReciverIdObj, receiverId: UserIdObj }
+            //     ]
+            //   });
 
-            if (!message || message.length === 0) {
+
+            const messages1 = await Message.find({ senderId: UserIdObj, receiverId: ReciverIdObj });
+            console.log('Messages where user is sender:', messages1);
+
+            const messages2 = await Message.find({ senderId: ReciverIdObj, receiverId: UserIdObj });
+            console.log('Messages where user is receiver:', messages2);
+
+
+            const messages = [...messages1, ...messages2]
+            .sort((a: any, b: any) => {
+                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(); 
+                
+            });
+
+            console.log('Merged and sorted messages:', messages);
+
+
+            console.log(messages, 'hello message')
+
+            if (!messages || messages.length === 0) {
                 return { success: false, message: 'No messages found' };
             }
 
-            return { success: true, message: 'Message found', data: message }
+
+            return { success: true, message: 'Message found', data: messages }
         } catch (error) {
             console.log('Error in find messages -->', error);
             return { success: false, message: 'Error in findMessage' }
@@ -94,9 +116,11 @@ export class ChatRepository implements IChatRepository {
     async createMessage(chatId: string, content: string, images: string[], video: string, senderId: string, recieverId: string): Promise<{ success: boolean, message: string, data?: IMessage }> {
         try {
 
+            console.log(senderId,'--------------------ids',recieverId)
+
             const newMessage = new Message({
                 senderId: new mongoose.Types.ObjectId(senderId),
-                recieverId: new mongoose.Types.ObjectId(recieverId),
+                receiverId: new mongoose.Types.ObjectId(recieverId),
                 content,
                 imagesUrl: images,
                 videoUrl: video,
@@ -104,8 +128,9 @@ export class ChatRepository implements IChatRepository {
             })
 
             const savedmessage = await newMessage.save();
-            await Chat.findByIdAndUpdate(chatId, { lastMessage: savedmessage._id });
-
+            console.log(savedmessage, 'savedMessage')
+            const update = await Chat.updateOne({ _id: chatId }, { lastMessage: savedmessage._id });
+            console.log(update, 'update')
             return { success: true, message: "message created successful", data: savedmessage }
         } catch (error) {
             console.log("Error in the createMessage -->", error);
