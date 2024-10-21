@@ -24,16 +24,25 @@ export class NotificationRepository {
         }
     }
 
-    async getNotification(id:string){
+    async getNotification(id: string) {
         try {
             console.log(id)
             const newId = new mongoose.Types.ObjectId(id);
-            const data = await Notification.find({senderId:newId});
-        
-            console.log(data)
-            return data
+            const notifications = await Notification.find({ senderId: newId })
+            .sort({ _id: -1 })  
+            .limit(15);
+            return notifications
         } catch (error) {
-            
+
+        }
+    }
+
+    async updateNotification(id: string) {
+        try {
+            const update = await Notification.updateMany({ userId: id }, { $set: { isRead: true } });
+            return update;
+        } catch (error) {
+            console.log('Error in the updateNotification in repo -->', error);
         }
     }
 }

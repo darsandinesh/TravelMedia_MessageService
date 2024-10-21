@@ -91,10 +91,10 @@ export class ChatRepository implements IChatRepository {
 
 
             const messages = [...messages1, ...messages2]
-            .sort((a: any, b: any) => {
-                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(); 
-                
-            });
+                .sort((a: any, b: any) => {
+                    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+
+                });
 
             console.log('Merged and sorted messages:', messages);
 
@@ -116,14 +116,10 @@ export class ChatRepository implements IChatRepository {
     async createMessage(chatId: string, content: string, images: string[], video: string, senderId: string, recieverId: string): Promise<{ success: boolean, message: string, data?: IMessage }> {
         try {
 
-            console.log(senderId,'--------------------ids',recieverId)
-
             const newMessage = new Message({
                 senderId: new mongoose.Types.ObjectId(senderId),
                 receiverId: new mongoose.Types.ObjectId(recieverId),
                 content,
-                imagesUrl: images,
-                videoUrl: video,
                 chatId: new mongoose.Types.ObjectId(chatId)
             })
 
@@ -132,6 +128,44 @@ export class ChatRepository implements IChatRepository {
             const update = await Chat.updateOne({ _id: chatId }, { lastMessage: savedmessage._id });
             console.log(update, 'update')
             return { success: true, message: "message created successful", data: savedmessage }
+        } catch (error) {
+            console.log("Error in the createMessage -->", error);
+            return { success: false, message: 'Something went worong ' }
+        }
+    }
+
+    async saveMedia(data: { images: { mimetype: string }[], senderId: string, chatId: string, receiverId: string }, media: string[]) {
+        try {
+
+            let newMessage
+            if (data.images[0].mimetype == 'video/mp4') {
+                newMessage = new Message({
+                    senderId: new mongoose.Types.ObjectId(data.senderId),
+                    receiverId: new mongoose.Types.ObjectId(data.receiverId),
+                    videoUrl: media,
+                    chatId: new mongoose.Types.ObjectId(data.chatId)
+                })
+            } else {
+                newMessage = new Message({
+                    senderId: new mongoose.Types.ObjectId(data.senderId),
+                    receiverId: new mongoose.Types.ObjectId(data.receiverId),
+                    imagesUrl: media,
+                    chatId: new mongoose.Types.ObjectId(data.chatId)
+                })
+            }
+
+
+            console.log(data)
+            console.log(newMessage)
+            if (newMessage) {
+                const savedmessage = await newMessage.save();
+
+                console.log(savedmessage, 'savedMessage')
+                const update = await Chat.updateOne({ _id: data.chatId }, { lastMessage: savedmessage._id });
+                console.log(update, 'update')
+                return { success: true, message: "message created successful", data: savedmessage }
+            }
+            return { success: false, message: 'Something went wrong' }
         } catch (error) {
             console.log("Error in the createMessage -->", error);
             return { success: false, message: 'Something went worong ' }

@@ -18,11 +18,9 @@ const MessageSchema: Schema = new Schema({
     },
     imagesUrl:{
         type:[String],
-        default:[]
     },
     videoUrl:{
-        type:String,
-        default:''
+        type:[String],
     },
     read:{
         type:Boolean,

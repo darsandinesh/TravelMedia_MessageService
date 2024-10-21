@@ -33,6 +33,18 @@ class NotificationService {
 
         }
     }
+
+    async updateNotification(id: string) {
+        try {
+            const result = await this.notificationRepo.updateNotification(id)
+            if (result && result?.matchedCount > 0) {
+                return { success: true, message: 'updated the notificaiton' };
+            } 
+            return { success: false, message: 'updated the notificaiton' };
+        } catch (error) {
+            return { success: false, message: 'Something went wrong' }
+        }
+    }
 }
 
 export { NotificationService }

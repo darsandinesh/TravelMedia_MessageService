@@ -21,6 +21,9 @@ export default class MessageHandler {
             case 'save-message':
                 response = await chatController.saveNewMessage(data);
                 break;
+            case 'save-image':
+                response = await chatController.saveMedia(data);
+                break;
 
             // notificaiton impementaion here
             case 'save-notification':
@@ -29,7 +32,9 @@ export default class MessageHandler {
             case 'getNotification':
                 response = await notificationController.getNotification(data);
                 break;
-
+            case 'update-Notification':
+                response = await notificationController.updateNotification(data)
+                break;
             default:
                 response = { error: "Operation not supported" };
                 break;

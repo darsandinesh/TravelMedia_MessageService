@@ -8,7 +8,7 @@ class ChatController {
         this.chatService = new ChatService();
     }
 
-    async getConversationData(data: {userId:string}) {
+    async getConversationData(data: { userId: string }) {
         try {
             console.log(data);
             const userId = data?.userId;
@@ -20,7 +20,7 @@ class ChatController {
         }
     }
 
-    async fetchChatId(data:{userId:string, recievedId:string}){
+    async fetchChatId(data: { userId: string, recievedId: string }) {
         try {
             const userId = data.userId;
             const recievedId = data.recievedId;
@@ -32,10 +32,10 @@ class ChatController {
         }
     }
 
-    async getMessages(data:{userId:string, recievedId:string}){
+    async getMessages(data: { userId: string, recievedId: string }) {
         try {
             const userId = data.userId;
-            const recievedId =data.recievedId;
+            const recievedId = data.recievedId;
             const result = await this.chatService.fetchMessages(userId, recievedId);
             return result;
         } catch (error) {
@@ -44,22 +44,34 @@ class ChatController {
         }
     }
 
-    async saveNewMessage(data:{chatId:string, content:string,images:string[],video:string,record:string, recordDuration:number, senderId:string, receiverId:string}){
+    async saveNewMessage(data: { chatId: string, content: string, images: string[], video: string, record: string, recordDuration: number, senderId: string, receiverId: string }) {
         try {
-            
+
             const chatId = data.chatId;
             const content = data.content;
             const images = data.images;
-            const video= data.video;
+            const video = data.video;
             const record = data.record;
             const recordDuration = data.recordDuration
             const senderId = data.senderId;
             const recieverId = data.receiverId;
-            
-            const result = await this.chatService.newMessage(chatId,content,images,video, senderId, recieverId);
+
+            const result = await this.chatService.newMessage(chatId, content, images, video, senderId, recieverId);
             return result;
         } catch (error) {
             console.error("Error creating messages:", error);
+            throw error;
+        }
+    }
+
+    async saveMedia(data: any) {
+        try {
+
+            const result = await this.chatService.saveMedia(data)
+            console.log(result, 'media upload');
+            return result;
+        } catch (error) {
+            console.error("Error saving images:", error);
             throw error;
         }
     }
