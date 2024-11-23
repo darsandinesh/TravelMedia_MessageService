@@ -54,20 +54,14 @@ export class ChatRepository implements IChatRepository {
                 {
                     $unwind: {
                         path: '$lastmessage',
-                        preserveNullAndEmptyArrays: true,  // In case there's no lastmessage
+                        preserveNullAndEmptyArrays: true,  
                     },
                 },
             ]);
 
-            console.log(chats,'------for testing');
-
-
-
             if (!chats || chats.length === 0) {
                 return { success: false, message: 'No chats found' }
             }
-
-            console.log(chats, 'chats------------002')
 
             const formattedChats = chats.map((chat: any) => ({
                 _id: chat._id,
@@ -75,7 +69,6 @@ export class ChatRepository implements IChatRepository {
                 lastMessage: chat.lastmessage,
                 unreadCount:chat.unreadCount
             }))
-            console.log(formattedChats, '--format');
             return { success: true, message: "Chats found", data: formattedChats };
         } catch (error) {
             const err = error as Error;
